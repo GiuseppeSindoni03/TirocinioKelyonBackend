@@ -1,10 +1,12 @@
 import { Gender } from 'src/auth/dto/gender-enum';
 import { Doctor } from 'src/doctor/doctor.entity';
+import { Patient } from 'src/patient/patient.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -85,4 +87,8 @@ export class Invite {
   })
   @JoinColumn()
   doctor: Doctor;
+
+  @OneToOne(() => Patient, (patient) => patient.id, {})
+  @JoinColumn()
+  patient: Patient;
 }

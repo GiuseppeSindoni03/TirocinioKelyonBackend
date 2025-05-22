@@ -10,6 +10,6 @@ import { DoctorModule } from 'src/doctor/doctor.module';
 @Module({
   imports: [TypeOrmModule.forFeature([Availability, Doctor]), DoctorModule],
   controllers: [AvailabilityController],
-  providers: [AvailabilityService, DoctorService],
+  providers: [AvailabilityService],
 })
 export class AvailabilityModule {}

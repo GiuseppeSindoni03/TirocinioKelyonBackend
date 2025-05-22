@@ -47,7 +47,7 @@ export class Doctor {
   })
   @JoinColumn({ name: 'userId' })
   @Exclude()
-  user: User;
+  user?: User;
 
   @OneToMany(() => Availability, (availability) => availability.doctor)
   availabilities: Availability[];

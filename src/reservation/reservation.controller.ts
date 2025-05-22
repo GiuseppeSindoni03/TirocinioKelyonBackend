@@ -25,7 +25,6 @@ import { VisitTypeEnum } from './types/visit-type.enum';
 
 @Controller('reservations')
 @UseGuards(RolesGuard)
-@UseGuards(AuthGuard('jwt'))
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 

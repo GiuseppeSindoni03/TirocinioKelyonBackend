@@ -20,7 +20,7 @@ import { GetUser } from 'src/auth/get-user-decorator';
 import { UserRoles } from 'src/common/enum/roles.enum';
 
 @Controller('doctor/availability')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(RolesGuard)
 export class AvailabilityController {
   constructor(private readonly availabilityService: AvailabilityService) {}
 

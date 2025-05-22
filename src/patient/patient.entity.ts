@@ -5,7 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import { MedicalExamination } from 'src/medical-examination/medical-examination.entity';
@@ -16,8 +16,8 @@ import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Patient {
-  @PrimaryColumn('uuid')
-  userId: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'float' })
   weight: number;
@@ -64,7 +64,7 @@ export class Patient {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn()
   @Exclude()
-  user: User;
+  user?: User;
 }

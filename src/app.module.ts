@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -7,10 +7,12 @@ import { PatientModule } from './patient/patient.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { MedicalExaminationModule } from './medical-examination/medical-examination.module';
 import { UserModule } from './user/user.module';
-import { SessionModule } from './session/session.module';
 import { InviteModule } from './invite/invite.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { ReservationModule } from './reservation/reservation.module';
+import { AuthMiddleware } from './auth/middleware/auth.middleware';
+// import { BaseUserInterceptor } from './transform.interceptor';
+// import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -38,11 +40,18 @@ import { ReservationModule } from './reservation/reservation.module';
     DoctorModule,
     MedicalExaminationModule,
     UserModule,
-    SessionModule,
     InviteModule,
     AvailabilityModule,
     ReservationModule,
   ],
   controllers: [],
+  // providers: [{ useClass: BaseUserInterceptor, provide: APP_INTERCEPTOR }],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      .exclude({ path: 'auth/*path', method: RequestMethod.ALL })
+      .forRoutes('*');
+  }
+}

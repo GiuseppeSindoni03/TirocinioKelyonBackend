@@ -1,9 +1,9 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { PatientService } from './patient.service';
-import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('patient')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(RolesGuard)
 export class PatientController {
   constructor(private patientService: PatientService) {}
 }

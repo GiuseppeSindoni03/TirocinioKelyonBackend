@@ -109,11 +109,11 @@ export class AvailabilityService {
   ) {
     const overlappingSlot = await this.availabilityRepository
       .createQueryBuilder('a')
-      .where('a.doctorId = :doctorId', { doctorId: userId })
+      .where('a.doctor.userId = :doctorId', { doctorId: userId })
       .andWhere('a.startTime < :end')
       .andWhere('a.endTime > :start')
       .setParameters({
-        start: startTime.toISOString,
+        start: startTime.toISOString(),
         end: endTime.toISOString(),
       })
       .getOne();

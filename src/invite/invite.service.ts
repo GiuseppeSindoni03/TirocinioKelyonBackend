@@ -40,22 +40,49 @@ export class InviteService {
   ): Promise<Invite> {
     const doctor = await this.findDoctorOrThrow(userId);
 
-    await this.createPatient(createInviteDto, doctor);
+    const { email, cf, phone } = createInviteDto;
 
-    return await this.createAndSaveInvite(createInviteDto, doctor);
+    const found = await this.inviteRepository
+      .createQueryBuilder('invite')
+      .where(
+        'invite.cf = :cf OR invite.phone =:phone OR invite.email = :email',
+        {
+          cf,
+          phone,
+          email,
+        },
+      )
+      .getOne();
+
+    console.log('Found: ', found);
+
+    if (found)
+      throw new BadRequestException('Invito per tale paziente già esiste');
+
+    const patient = await this.createPatient(createInviteDto, doctor);
+
+    console.log('Patient created: ', patient);
+
+    return this.createAndSaveInvite(createInviteDto, doctor, patient);
   }
 
   async acceptInvite(
     data: AcceptInviteDto,
     inviteId: string,
-    user: UserItem,
+    //user: UserItem,
   ): Promise<{ message: string }> {
     const invite = await this.findValidInviteOrThrow(inviteId);
 
-    const hashedPassword = await this.hashPassword(data.password);
-    const patientUser = await this.createUserPatient(data, hashedPassword);
+    console.log(invite);
 
-    await this.assignPatientToUser(invite.doctor.userId, user.id, patientUser);
+    const hashedPassword = await this.hashPassword(data.password);
+    const user = await this.createUserPatient(data, hashedPassword);
+
+    await this.assignPatientToUser(
+      invite.doctor.userId,
+      invite.patient.id,
+      user,
+    );
 
     await this.markInviteAsUsed(inviteId);
 
@@ -98,20 +125,22 @@ export class InviteService {
   private async createAndSaveInvite(
     createInviteDto: CreateInviteDto,
     doctor: Doctor,
+    patient: Patient,
   ) {
     const invite = this.inviteRepository.create({
       ...createInviteDto,
       doctor: doctor,
+      patient: patient,
       expiresAt: addDays(new Date(), 7),
     });
 
-    return await this.inviteRepository.save(invite);
+    return this.inviteRepository.save(invite);
   }
 
   private async findValidInviteOrThrow(inviteId: string) {
     const invite = await this.inviteRepository.findOne({
       where: { id: inviteId },
-      relations: ['doctor'],
+      relations: ['doctor', 'patient'],
     });
 
     if (!invite) {
@@ -142,6 +171,10 @@ export class InviteService {
     info: AcceptInviteDto,
     hashedPassword: string,
   ): Promise<User> {
+    const exist = await this.findUser(info.email, info.phone, info.cf);
+
+    if (exist) throw new ConflictException('User already exist');
+
     const user = this.userRepository.create({
       email: info.email,
       password: hashedPassword,
@@ -163,22 +196,33 @@ export class InviteService {
 
   private async assignPatientToUser(
     doctorId: string,
-    userId: string,
-    newPatientUser: User,
+    patientId: string,
+    newUser: User,
   ) {
     const patient = await this.patientRepository.findOne({
-      where: { doctor: { userId: doctorId }, user: { id: userId } },
+      where: { doctor: { userId: doctorId }, id: patientId },
     });
 
     if (!patient) {
       throw new NotFoundException('Patient not found');
     }
 
-    patient.user = newPatientUser;
+    patient.user = newUser;
     await this.patientRepository.save(patient);
   }
 
   private async markInviteAsUsed(inviteId: string): Promise<void> {
     await this.inviteRepository.update({ id: inviteId }, { used: true });
+  }
+
+  private async findUser(email: string, phone: string, cf: string) {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('user.email = :email OR user.phone = :phone OR user.cf = :cf', {
+        email,
+        phone,
+        cf,
+      })
+      .getOne();
   }
 }

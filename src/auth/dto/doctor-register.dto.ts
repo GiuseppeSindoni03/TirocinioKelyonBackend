@@ -87,4 +87,8 @@ export class DoctorRegisterDto {
   @IsNotEmpty()
   @IsString()
   specialization: string;
+
+  @IsNotEmpty()
+  @IsString()
+  confirmPassword: string;
 }

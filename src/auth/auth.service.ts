@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,17 +19,12 @@ import { DeviceInfo } from './utils/deviceInfo';
 import { Doctor } from 'src/doctor/doctor.entity';
 import { LogoutDto } from './dto/logout.dto';
 import { UserRoles } from 'src/common/enum/roles.enum';
+import { UserItem } from 'src/common/types/userItem';
 
 interface AuthResponse {
   accessToken: string;
   refreshToken: string;
-  user: {
-    name: string;
-    surname: string;
-    email: string;
-    role: string;
-    id: string;
-  };
+  user: UserItem;
 }
 
 @Injectable()
@@ -71,13 +67,7 @@ export class AuthService {
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-      user: {
-        name: info.name,
-        surname: info.surname,
-        email: info.email,
-        role: UserRoles.DOCTOR,
-        id: doctor.id,
-      },
+      user: doctor,
     };
   }
 
@@ -91,6 +81,17 @@ export class AuthService {
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    let finalUser: UserItem = user;
+    if (user.role === UserRoles.DOCTOR) {
+      const doctor = await this.doctorRepository.findOne({
+        where: { userId: user.id },
+      });
+
+      if (!doctor) throw new NotFoundException('Doctor info not found');
+
+      finalUser.doctor = doctor;
     }
 
     const session = await this.createSession(user, deviceInfo);
@@ -108,19 +109,11 @@ export class AuthService {
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-      user: {
-        name: user.name,
-        surname: user.surname,
-        email: user.email,
-        role: user.role,
-        id: user.id,
-      },
+      user: user,
     };
   }
 
-  async refreshToken(refreshDto: RefreshDto): Promise<TokensDto> {
-    const { refreshToken } = refreshDto;
-
+  async refreshToken(refreshToken: string): Promise<string> {
     const payload = this.verifyToken(refreshToken);
 
     const session = await this.sessionRepository.findOne({
@@ -135,22 +128,19 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const tokens: TokensDto = await this.generateTokens({
-      userId: session.user.id,
-      sessionId: session.id,
+    const cleanPayload = {
+      userId: payload.userId,
+      sessionId: payload.sessionId,
+    };
+
+    const accessToken: string = await this.jwtService.sign(cleanPayload, {
+      expiresIn: '15m',
     });
 
-    const hashedRefreshToken = await this.hashToken(tokens.refreshToken);
-
-    session.refreshToken = hashedRefreshToken;
-    await this.sessionRepository.save(session);
-
-    return tokens;
+    return accessToken;
   }
 
-  async logout(logoutDto: LogoutDto): Promise<void> {
-    const { refreshToken } = logoutDto;
-
+  async logout(refreshToken: string): Promise<void> {
     const payload = this.verifyToken(refreshToken);
 
     const session = await this.sessionRepository.findOne({
@@ -164,12 +154,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    try {
-      await this.sessionRepository.remove(session);
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
+    await this.sessionRepository.remove(session);
   }
 
   private async hashPassword(password: string) {
