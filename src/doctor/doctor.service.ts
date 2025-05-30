@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Doctor } from './doctor.entity';
 import { Repository } from 'typeorm';
@@ -81,8 +81,7 @@ export class DoctorService {
       relations: ['patient'],
     });
 
-    console.log('Lista di Pazienti: ', patients);
-    // react qr-code
+    // console.log('Lista di Pazienti: ', patients);
 
     return patients.map((patient): PatientItem => {
       if (patient.user) {
@@ -93,9 +92,9 @@ export class DoctorService {
           user: safeUser,
         };
       }
-      console.log('Cerco per invito:');
+      // console.log('Cerco per invito:');
       const invite = invites.find((inv) => inv.patient.id === patient.id);
-      console.log(invite);
+      //console.log(invite);
 
       let userData: any = null;
 
@@ -128,6 +127,60 @@ export class DoctorService {
         injuries: patient.injuries,
       };
     });
+  }
+
+  async getPatientById(patientId: string): Promise<PatientItem> {
+    const patient = await this.patientRepository.findOne({
+      where: { id: patientId },
+    });
+
+    if (!patient) throw new BadRequestException("Patient doesn't exist.");
+
+    if (patient.user) {
+      const { password, ...safeUser } = patient.user;
+
+      return {
+        ...patient,
+        user: safeUser,
+      };
+    }
+
+    const invite = await this.inviteRepository.findOne({
+      where: { patient: { id: patientId } },
+    });
+
+    if (!invite) throw new BadRequestException("Patient doesn't exist.");
+
+    console.log(invite);
+
+    let userData: any = null;
+
+    userData = {
+      name: invite.name,
+      surname: invite.surname,
+      email: invite.email,
+      cf: invite.cf,
+      birthDate: invite.birthDate,
+      gender: invite.gender,
+      phone: invite.phone,
+      address: invite.address,
+      city: invite.city,
+      cap: invite.cap,
+      province: invite.province,
+    };
+
+    return {
+      id: patient.id,
+      user: userData,
+      weight: patient.weight,
+      height: patient.height,
+      bloodType: patient.bloodType,
+      level: patient.level,
+      sport: patient.sport,
+      patologies: patient.patologies,
+      medications: patient.medications,
+      injuries: patient.injuries,
+    };
   }
 
   private async getDoctorOrThrow(userId: string) {

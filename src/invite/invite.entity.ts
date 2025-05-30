@@ -78,8 +78,8 @@ export class Invite {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  expiresAt: Date;
+  // @Column({ type: 'timestamp', nullable: true })
+  // expiresAt: Date;
 
   @ManyToOne((type) => Doctor, (doctor) => doctor.userId, {
     cascade: true,

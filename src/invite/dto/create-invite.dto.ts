@@ -76,10 +76,6 @@ export class CreateInviteDto {
   height: number;
 
   @IsNotEmpty()
-  @IsString()
-  bloodType: string;
-
-  @IsNotEmpty()
   @IsEnum(PatientLevel, {
     message: 'The level must be ADVANCED, INTERMEDIATE or BEGINNER',
   })
@@ -90,14 +86,15 @@ export class CreateInviteDto {
   sport: string;
 
   @IsNotEmpty()
+  @IsString()
+  bloodType: string;
+
   @IsArray()
   patologies: string[];
 
-  @IsNotEmpty()
   @IsArray()
   medications: string[];
 
-  @IsNotEmpty()
   @IsArray()
   injuries: string[];
 }

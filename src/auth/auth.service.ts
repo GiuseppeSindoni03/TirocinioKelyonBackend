@@ -184,7 +184,7 @@ export class AuthService {
         phone,
         cf,
       })
-      .getOne();
+      .getMany();
   }
 
   private async createUserDoctor(

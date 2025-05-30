@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -17,6 +17,13 @@ export class DoctorController {
   getPatients(@GetUser() user: UserItem) {
     return this.doctorService.getPatients(user.id);
   }
+
+  @Get('/patients/:id')
+  @Roles(UserRoles.DOCTOR)
+  getPatientById(@GetUser() user: UserItem, @Param('id') patientId: string) {
+    return this.doctorService.getPatientById(patientId);
+  }
+
   @Get('/me')
   @Roles(UserRoles.DOCTOR)
   getMe(@GetUser() user: UserItem) {

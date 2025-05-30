@@ -71,7 +71,7 @@ export class InviteService {
     inviteId: string,
     //user: UserItem,
   ): Promise<{ message: string }> {
-    const invite = await this.findValidInviteOrThrow(inviteId);
+    const invite = await this.findAndValidate(inviteId);
 
     console.log(invite);
 
@@ -131,13 +131,13 @@ export class InviteService {
       ...createInviteDto,
       doctor: doctor,
       patient: patient,
-      expiresAt: addDays(new Date(), 7),
+      // expiresAt: addDays(new Date(), 7),
     });
 
     return this.inviteRepository.save(invite);
   }
 
-  private async findValidInviteOrThrow(inviteId: string) {
+  private async findAndValidate(inviteId: string) {
     const invite = await this.inviteRepository.findOne({
       where: { id: inviteId },
       relations: ['doctor', 'patient'],
@@ -150,9 +150,9 @@ export class InviteService {
       throw new BadRequestException('Invite already used');
     }
 
-    if (invite.expiresAt < new Date()) {
-      throw new BadRequestException('Invite expired');
-    }
+    // if (invite.expiresAt < new Date()) {
+    //   throw new BadRequestException('Invite expired');
+    // }
 
     return invite;
   }
