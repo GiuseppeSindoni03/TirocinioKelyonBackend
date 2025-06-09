@@ -85,17 +85,16 @@ export class ReservationService {
   ) {
     const { startTime, endTime, visitType } = createReservationDto;
 
-    await this.ensureSlotNotBooked(doctor, startTime);
+    const start = new Date(startTime);
+    const end = new Date(endTime);
 
-    await this.findValidAvailabilityOrThrow(doctor, startTime, endTime);
+    await this.ensureSlotNotBooked(doctor, start);
+
+    await this.findValidAvailabilityOrThrow(doctor, start, end);
 
     const visitTypeEntity = await this.findVisitTypeOrThrow(visitType);
 
-    await this.checkVisitDuration(
-      visitTypeEntity.durationMinutes,
-      startTime,
-      endTime,
-    );
+    await this.checkVisitDuration(visitTypeEntity.durationMinutes, start, end);
 
     const reservation = this.reservationRepository.create({
       startDate: startTime,
@@ -199,11 +198,13 @@ export class ReservationService {
   ) {
     const validAvailability = await this.availabilityRepository
       .createQueryBuilder('a')
-      .where('a.doctorId = :doctorId', { doctorId: doctor.userId })
+      .where('a.doctorUserId = :doctorId', { doctorId: doctor.userId })
       .andWhere('a.startTime <= :startTime')
       .andWhere('a.endTime >= :endTime')
       .setParameters({ startTime, endTime })
       .getOne();
+
+    console.log(validAvailability);
 
     if (!validAvailability) {
       throw new BadRequestException(

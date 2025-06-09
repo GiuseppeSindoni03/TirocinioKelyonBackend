@@ -1,6 +1,7 @@
 import { IsEnum, IsISO8601, IsNotEmpty } from 'class-validator';
 import { IsSameDay } from 'src/common/validators/IsSameDayAndValidRange';
 import { VisitTypeEnum } from '../types/visit-type.enum';
+import { Type } from 'class-transformer';
 
 export class CreateReservationDto {
   @IsNotEmpty()
