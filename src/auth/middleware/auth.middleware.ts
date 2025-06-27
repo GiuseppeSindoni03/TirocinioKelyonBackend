@@ -14,6 +14,7 @@ import { UserItem } from 'src/common/types/userItem';
 import { Doctor } from 'src/doctor/doctor.entity';
 import { Patient } from 'src/patient/patient.entity';
 import { UserRoles } from 'src/common/enum/roles.enum';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
@@ -50,8 +51,6 @@ export class AuthMiddleware implements NestMiddleware {
         secure: true,
         sameSite: 'lax',
       });
-
-      //console.log('AccessToken Valido');
 
       return next();
     } catch (err) {

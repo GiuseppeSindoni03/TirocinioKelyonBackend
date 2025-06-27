@@ -8,6 +8,8 @@ import { UserItem } from 'src/common/types/userItem';
 import { PatientItem } from 'src/common/types/patientItem';
 import { Invite } from 'src/invite/invite.entity';
 import { DoctorItem, UserWithoutPassword } from 'src/common/types/doctorItem';
+import { PatientsResponse } from 'src/patient/types/patients-response.interface';
+import { take } from 'rxjs';
 
 @Injectable()
 export class DoctorService {
@@ -68,12 +70,19 @@ export class DoctorService {
     return doctorItem;
   }
 
-  async getPatients(userId: string): Promise<PatientItem[]> {
+  async getPatients(
+    userId: string,
+    page: number,
+    limit: number,
+    search: string | undefined,
+  ): Promise<PatientsResponse> {
     const doctor = await this.getDoctorOrThrow(userId);
 
-    const patients = await this.patientRepository.find({
+    const [patients, total] = await this.patientRepository.findAndCount({
       where: { doctor: { userId: doctor.userId } },
       relations: ['user'],
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
     const invites = await this.inviteRepository.find({
@@ -83,12 +92,13 @@ export class DoctorService {
 
     // console.log('Lista di Pazienti: ', patients);
 
-    return patients.map((patient): PatientItem => {
+    const mapped = patients.map((patient): PatientItem => {
       if (patient.user) {
         const { password, ...safeUser } = patient.user;
 
         return {
           ...patient,
+          inviteId: undefined,
           user: safeUser,
         };
       }
@@ -127,6 +137,28 @@ export class DoctorService {
         injuries: patient.injuries,
       };
     });
+
+    const filtered = search
+      ? mapped.filter((p) => {
+          const user = p.user;
+          if (!user) return false;
+
+          const searchLower = search.toLowerCase();
+          return (
+            user.name?.toLowerCase().includes(searchLower) ||
+            user.surname?.toLowerCase().includes(searchLower) ||
+            user.email?.toLowerCase().includes(searchLower) ||
+            user.cf?.toLowerCase().includes(searchLower)
+          );
+        })
+      : mapped;
+
+    return {
+      data: filtered,
+      total: total,
+      page,
+      limit,
+    };
   }
 
   async getPatientById(patientId: string): Promise<PatientItem> {
@@ -141,6 +173,7 @@ export class DoctorService {
 
       return {
         ...patient,
+        inviteId: undefined,
         user: safeUser,
       };
     }
@@ -156,6 +189,7 @@ export class DoctorService {
     let userData: any = null;
 
     userData = {
+      inviteId: invite.id,
       name: invite.name,
       surname: invite.surname,
       email: invite.email,

@@ -22,6 +22,7 @@ import { UserItem } from 'src/common/types/userItem';
 import { UserRoles } from 'src/common/enum/roles.enum';
 import { VisitType } from './visit-type.entity';
 import { VisitTypeEnum } from './types/visit-type.enum';
+import * as moment from 'moment-timezone';
 
 @Controller('reservations')
 @UseGuards(RolesGuard)
@@ -97,16 +98,25 @@ export class ReservationController {
   async getSlots(
     @GetUser() user: UserItem,
     @Query('date') date: string,
-    @Query('visitType') visitType: VisitTypeEnum,
+    @Query('visitType') visitType: VisitTypeEnum = VisitTypeEnum.CONTROL,
   ) {
     const patient = user.patient;
 
     if (!patient) throw new UnauthorizedException('You are not a patient');
 
-    return this.reservationService.getReservationSlots(
+    const localDate = moment.tz(date, 'YYYY-MM-DD', 'Europe/Rome').format();
+
+    const slots = await this.reservationService.getReservationSlots(
       patient.doctor,
-      date,
+      localDate,
       visitType,
     );
+
+    const localSlots = slots.map((slot) => ({
+      startTime: moment(slot.startTime).tz('Europe/Rome').format(),
+      endTime: moment(slot.endTime).tz('Europe/Rome').format(),
+    }));
+
+    return localSlots;
   }
 }

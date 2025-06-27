@@ -75,49 +75,6 @@ export class AuthController {
     return user;
   }
 
-  // @UseGuards(AuthGuard('jwt-refresh'))
-  // @Post('/refresh')
-  // async refresh(
-  //   @Req() req: Request,
-  //   @Res({ passthrough: true }) res: Response,
-  // ): Promise<UserItem> {
-  //   const refreshPayload = req.user as JwtPayload;
-
-  //   const { accessToken, refreshToken, user } =
-  //     await this.authService.refreshToken(refreshPayload);
-
-  //   res
-  //     .cookie('jwt', accessToken, {
-  //       httpOnly: true,
-  //       secure: true,
-  //       sameSite: 'lax',
-  //     })
-  //     .cookie('refreshToken', refreshToken, {
-  //       httpOnly: true,
-  //       secure: true,
-  //       sameSite: 'lax',
-  //     });
-
-  //   return user;
-  // }
-
-  // @Post('/refresh')
-  // @UseGuards(AuthGuard('jwt-refresh'))
-  // refresh(@Body() refreshDto: RefreshDto): Promise<TokensDto> {
-  //   return this.authService.refreshToken(refreshDto);
-  // }
-
-  // @Post('/logout')
-  // async logout(@Req() req: Request, @Res() res: Response): Promise<void> {
-  //   const refreshToken = req.cookies.refreshToken;
-  //   if (!refreshToken) throw new UnauthorizedException('Missing refresh token');
-
-  //   res.clearCookie('jwt');
-  //   res.clearCookie('refreshToken');
-
-  //   return this.authService.logout(refreshToken);
-  // }
-
   @Post('/logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies.refreshToken;

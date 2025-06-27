@@ -12,6 +12,9 @@ export class Availability {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  title: string;
+
   @Column({ type: 'timestamptz' })
   @Unique(['doctor', 'startTime'])
   startTime: Date;

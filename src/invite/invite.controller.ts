@@ -27,8 +27,7 @@ export class InviteController {
   async createInvite(
     @GetUser() user: UserItem,
     @Body() inviteDto: CreateInviteDto,
-  ): Promise<Invite> {
-    console.log('Paziente creato:', inviteDto);
+  ): Promise<{ patientId: string }> {
     return this.inviteService.createInvite(inviteDto, user.id);
   }
 

@@ -12,6 +12,7 @@ import { Doctor } from 'src/doctor/doctor.entity';
 import { GroupedAvailabilities } from 'src/availability/types/grouped-availabilities';
 import { endOfDay, format, isBefore, startOfDay } from 'date-fns';
 import { AvailabilitySlotDto } from './dto/availability-slot.dto';
+import { UserItem } from 'src/common/types/userItem';
 
 @Injectable()
 export class AvailabilityService {
@@ -35,6 +36,7 @@ export class AvailabilityService {
     await this.checkNoOverlappingSlots(doctor.userId, startTime, endTime);
 
     const availability = this.availabilityRepository.create({
+      title: createAvailability.title,
       startTime,
       endTime,
       doctor,
@@ -59,6 +61,7 @@ export class AvailabilityService {
 
         acc[dateKey].push({
           id: slot.id,
+          title: slot.title,
           startTime: slot.startTime.toISOString(),
           endTime: slot.endTime.toISOString(),
         });
@@ -144,5 +147,23 @@ export class AvailabilityService {
       startTime: start,
       endTime: end,
     };
+  }
+
+  async deleteAvailability(user: UserItem, idAvailability: string) {
+    console.log('Id: ', idAvailability);
+
+    const exist = await this.availabilityRepository
+      .createQueryBuilder('availability')
+      .where('availability.id = :idAvailability', {
+        idAvailability: idAvailability,
+      })
+      .andWhere('availability.doctorUserId = :doctorId', { doctorId: user.id })
+      .getOne();
+
+    console.log('Deleting event: ', exist);
+
+    if (exist) return this.availabilityRepository.remove(exist);
+
+    throw new BadRequestException("Availability doesn't exist");
   }
 }

@@ -34,6 +34,7 @@
     "class-validator": "^0.14.1",
     "codice-fiscale-js": "^2.3.22",
     "cookie-parser": "^1.4.7",
+    "moment-timezone": "^0.6.0",
     "objection": "^3.1.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

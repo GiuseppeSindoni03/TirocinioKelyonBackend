@@ -8,7 +8,7 @@ export interface PatientItem {
   patologies: string[];
   medications: string[];
   injuries: string[];
-  // doctor: Doctor; // Assicurati che esista un'interfaccia Doctor
+  inviteId?: string;
   user: {
     id: string;
     name: string;

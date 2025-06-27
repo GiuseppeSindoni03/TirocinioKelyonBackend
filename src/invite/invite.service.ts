@@ -37,7 +37,7 @@ export class InviteService {
   async createInvite(
     createInviteDto: CreateInviteDto,
     userId: string,
-  ): Promise<Invite> {
+  ): Promise<{ patientId: string }> {
     const doctor = await this.findDoctorOrThrow(userId);
 
     const { email, cf, phone } = createInviteDto;
@@ -63,7 +63,9 @@ export class InviteService {
 
     console.log('Patient created: ', patient);
 
-    return this.createAndSaveInvite(createInviteDto, doctor, patient);
+    await this.createAndSaveInvite(createInviteDto, doctor, patient);
+
+    return { patientId: patient.id };
   }
 
   async acceptInvite(

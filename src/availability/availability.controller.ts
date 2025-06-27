@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   Query,
   Req,
@@ -18,6 +20,7 @@ import { Roles } from 'src/auth/decorators/role.decorator';
 import { UserItem } from 'src/common/types/userItem';
 import { GetUser } from 'src/auth/get-user-decorator';
 import { UserRoles } from 'src/common/enum/roles.enum';
+import { IsUUID } from 'class-validator';
 
 @Controller('doctor/availability')
 @UseGuards(RolesGuard)
@@ -56,6 +59,12 @@ export class AvailabilityController {
     }
 
     return this.availabilityService.getAvailabilities(doctor);
+  }
+
+  @Delete(':id')
+  @Roles(UserRoles.DOCTOR)
+  async deleteAvailability(@GetUser() user: UserItem, @Param('id') id: string) {
+    return this.availabilityService.deleteAvailability(user, id);
   }
 
   // PRIVATE

@@ -20,6 +20,7 @@ import { Doctor } from 'src/doctor/doctor.entity';
 import { LogoutDto } from './dto/logout.dto';
 import { UserRoles } from 'src/common/enum/roles.enum';
 import { UserItem } from 'src/common/types/userItem';
+import { addDays } from 'date-fns';
 
 interface AuthResponse {
   accessToken: string;
@@ -47,6 +48,7 @@ export class AuthService {
     deviceInfo: DeviceInfo,
   ): Promise<AuthResponse> {
     const existingUser = await this.findUser(info.email, info.phone, info.cf);
+    console.log('Utente esistente: ', existingUser);
     if (existingUser) throw new ConflictException('User already exists');
 
     const hashedPassword = await this.hashPassword(info.password);
@@ -184,7 +186,7 @@ export class AuthService {
         phone,
         cf,
       })
-      .getMany();
+      .getOne();
   }
 
   private async createUserDoctor(
@@ -234,7 +236,7 @@ export class AuthService {
     const session = this.sessionRepository.create({
       user: user,
       createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      expiresAt: addDays(new Date(), 14),
       deviceInfo: deviceInfo.userAgent,
       ipAddress: deviceInfo.ipAddress,
     });
@@ -243,10 +245,10 @@ export class AuthService {
   }
 
   private async generateTokens(payload: JwtPayload): Promise<TokensDto> {
-    const accessToken: string = await this.jwtService.sign(payload, {
+    const accessToken: string = this.jwtService.sign(payload, {
       expiresIn: '15m',
     });
-    const refreshToken: string = await this.jwtService.sign(payload, {
+    const refreshToken: string = this.jwtService.sign(payload, {
       expiresIn: '7d',
     });
 

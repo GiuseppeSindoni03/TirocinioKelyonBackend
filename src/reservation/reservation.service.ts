@@ -18,6 +18,7 @@ import { TimeSlot } from './types/time-slot.interface';
 import { OccupiedSlot } from './types/occupied-slot.interface';
 import { VisitType } from './visit-type.entity';
 import { VisitTypeEnum } from './types/visit-type.enum';
+import { ReservationsDTO } from './types/reservation.dto';
 
 @Injectable()
 export class ReservationService {
@@ -34,14 +35,24 @@ export class ReservationService {
 
   async getReservations(
     doctor: Doctor,
-  ): Promise<{ date: string; reservations: Reservation[] }[]> {
+  ): Promise<{ date: string; reservations: ReservationsDTO[] }[]> {
+    // const reservations = await this.reservationRepository
+    //   .createQueryBuilder('r')
+    //   .where({ doctor })
+    //   .andWhere('r.status = :status', { status: 'CONFIRMED' })
+    //   .orderBy('r.startDate', 'ASC')
+    //   .getMany();
+
     const reservations = await this.reservationRepository
       .createQueryBuilder('r')
+      .leftJoinAndSelect('r.patient', 'patient') // Join con Patient
+      .leftJoinAndSelect('patient.user', 'user') // Join con User per ottenere le informazioni dell'utente
       .where({ doctor })
+      .andWhere('r.status = :status', { status: 'CONFIRMED' })
       .orderBy('r.startDate', 'ASC')
       .getMany();
 
-    const grouped: Record<string, Reservation[]> = {};
+    const grouped: Record<string, ReservationsDTO[]> = {};
 
     reservations.forEach((reservation) => {
       const dateKey = reservation.startDate.toISOString().split('T')[0];
@@ -50,7 +61,23 @@ export class ReservationService {
         grouped[dateKey] = [];
       }
 
-      grouped[dateKey].push(reservation);
+      const reservationDTO: ReservationsDTO = {
+        id: reservation.id,
+        startTime: reservation.startDate.toISOString(),
+        endTime: reservation.endDate.toISOString(),
+        createdAt: reservation.createdAt.toISOString(),
+        status: reservation.status,
+        visitType: reservation.visitType,
+        patient: {
+          name: reservation.patient.user!!.name,
+          surname: reservation.patient.user!!.name,
+          id: reservation.patient.id,
+          gender: reservation.patient.user!!.gender,
+          cf: reservation.patient.user!!.cf,
+        },
+      };
+
+      grouped[dateKey].push(reservationDTO);
     });
 
     return Object.entries(grouped).map(([date, reservations]) => ({
@@ -69,7 +96,7 @@ export class ReservationService {
 
     return this.reservationRepository
       .createQueryBuilder('r')
-      .where('r.doctorId = :doctorId', { doctorId })
+      .where('r.doctorUserId = :doctorId', { doctorId })
       .andWhere('r.startDate BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
@@ -220,7 +247,7 @@ export class ReservationService {
     return await this.reservationRepository
       .createQueryBuilder('r')
       .where('r.id = :reservationId', { reservationId })
-      .andWhere('r.doctorId = :doctorId', { doctorId: doctor.userId })
+      .andWhere('r.doctorUserId = :doctorId', { doctorId: doctor.userId })
       .andWhere('r.status = :reservationStatus', {
         reservationStatus: ReservationStatus.PENDING,
       })
@@ -230,7 +257,7 @@ export class ReservationService {
   private async getAvailabilitiesOrThrow(doctorId: string, date: Date) {
     const availabilities = await this.availabilityRepository
       .createQueryBuilder('a')
-      .where('a.doctorId = :doctorId', { doctorId: doctorId })
+      .where('a.doctorUserId = :doctorId', { doctorId: doctorId })
       .andWhere('DATE(a.startTime) = :date', { date })
       .getMany();
 
