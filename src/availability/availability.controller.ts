@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  ParseDatePipe,
   Post,
   Query,
   Req,
@@ -40,25 +41,13 @@ export class AvailabilityController {
   // mi immagino serva tipo quando compare l'intero calendario
   @Get()
   @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
-  async getAvailabilities(@GetUser() user: UserItem) {
-    const doctor = this.getDoctorOrThrow(user);
-    return this.availabilityService.getAvailabilities(doctor);
-  }
-
-  //qui invece immagino serva quando hai focus su un giorno specifico del calendario
-  @Get('/date')
-  @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
-  async getAvailabilitiesDate(
+  async getAvailabilities(
     @GetUser() user: UserItem,
-    @Query('date') date?: string,
+    @Query('start', new ParseDatePipe()) start: Date,
+    @Query('end', new ParseDatePipe()) end: Date,
   ) {
     const doctor = this.getDoctorOrThrow(user);
-
-    if (date) {
-      return this.availabilityService.getAvailabiltiesByDate(doctor, date);
-    }
-
-    return this.availabilityService.getAvailabilities(doctor);
+    return this.availabilityService.getAvailabilities(doctor, start, end);
   }
 
   @Delete(':id')

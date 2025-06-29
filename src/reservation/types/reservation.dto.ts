@@ -6,7 +6,7 @@ export interface ReservationsDTO {
   endTime: string;
   createdAt: string;
   status: string;
-  visitType: VisitType;
+  visitType: string;
   patient: {
     id: string;
     name: string;

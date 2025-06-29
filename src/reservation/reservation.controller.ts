@@ -2,8 +2,11 @@ import {
   BadRequestException,
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
+  ParseDatePipe,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
   Post,
@@ -12,17 +15,21 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
-import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/role.decorator';
 import { CreateReservationDto } from './dto/create-reservation.dto';
-import { GetSlot } from './dto/get-slot.dto';
 import { GetUser } from 'src/auth/get-user-decorator';
 import { UserItem } from 'src/common/types/userItem';
 import { UserRoles } from 'src/common/enum/roles.enum';
-import { VisitType } from './visit-type.entity';
 import { VisitTypeEnum } from './types/visit-type.enum';
 import * as moment from 'moment-timezone';
+import { ReservationStatus } from './types/reservation-status-enum';
+
+enum ReservationQueryFilter {
+  ALL = 'ALL',
+  CONFIRMED = 'CONFIRMED',
+  PENDING = 'PENDING',
+}
 
 @Controller('reservations')
 @UseGuards(RolesGuard)
@@ -31,12 +38,30 @@ export class ReservationController {
 
   @Get()
   @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
-  async getReservations(@GetUser() user: UserItem) {
+  async getReservations(
+    @GetUser() user: UserItem,
+    @Query('start', new ParseDatePipe()) start: Date,
+    @Query('end', new ParseDatePipe()) end: Date,
+
+    @Query(
+      'status',
+      new DefaultValuePipe('ALL'),
+      new ParseEnumPipe(ReservationQueryFilter),
+    )
+    status: ReservationQueryFilter,
+  ) {
     if (!user.doctor) {
       throw new UnauthorizedException('You are not a doctor');
     }
 
-    return this.reservationService.getReservations(user.doctor);
+    console.log(status);
+
+    return this.reservationService.getReservations(
+      user.doctor,
+      status,
+      start,
+      end,
+    );
   }
 
   @Post()

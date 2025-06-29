@@ -35,22 +35,37 @@ export class ReservationService {
 
   async getReservations(
     doctor: Doctor,
+    status: string,
+    start: Date,
+    end: Date,
   ): Promise<{ date: string; reservations: ReservationsDTO[] }[]> {
-    // const reservations = await this.reservationRepository
-    //   .createQueryBuilder('r')
-    //   .where({ doctor })
-    //   .andWhere('r.status = :status', { status: 'CONFIRMED' })
-    //   .orderBy('r.startDate', 'ASC')
-    //   .getMany();
-
-    const reservations = await this.reservationRepository
+    const query = this.reservationRepository
       .createQueryBuilder('r')
-      .leftJoinAndSelect('r.patient', 'patient') // Join con Patient
-      .leftJoinAndSelect('patient.user', 'user') // Join con User per ottenere le informazioni dell'utente
-      .where({ doctor })
-      .andWhere('r.status = :status', { status: 'CONFIRMED' })
-      .orderBy('r.startDate', 'ASC')
-      .getMany();
+      .leftJoinAndSelect('r.patient', 'patient')
+      .leftJoinAndSelect('patient.user', 'user')
+      .leftJoinAndSelect('r.visitType', 'visitType')
+      .where('r.doctorUserId = :doctor', { doctor: doctor.userId });
+
+    const normalizedStatus = status?.toUpperCase?.();
+
+    if (normalizedStatus === ReservationStatus.CONFIRMED) {
+      query.andWhere('r.status = :status', {
+        status: ReservationStatus.CONFIRMED,
+      });
+    } else {
+      query.andWhere('r.status != :status', {
+        status: ReservationStatus.DECLINED,
+      });
+    }
+
+    if (start && end) {
+      query.andWhere('(r.startDate < :end AND r.endDate > :start)', {
+        start,
+        end,
+      });
+    }
+
+    const reservations = await query.orderBy('r.startDate', 'ASC').getMany();
 
     const grouped: Record<string, ReservationsDTO[]> = {};
 
@@ -67,7 +82,7 @@ export class ReservationService {
         endTime: reservation.endDate.toISOString(),
         createdAt: reservation.createdAt.toISOString(),
         status: reservation.status,
-        visitType: reservation.visitType,
+        visitType: reservation.visitType.name,
         patient: {
           name: reservation.patient.user!!.name,
           surname: reservation.patient.user!!.name,
@@ -145,6 +160,10 @@ export class ReservationService {
     if (!reservation)
       throw new BadRequestException("Reservation doesn't exist");
 
+    reservation.doctor = doctor;
+
+    await this.checkConflictReservation(reservation);
+
     reservation.status = ReservationStatus.CONFIRMED;
 
     return await this.reservationRepository.save(reservation);
@@ -203,6 +222,28 @@ export class ReservationService {
   }
 
   // PRIVATE
+
+  private async checkConflictReservation(reservation: Reservation) {
+    const overlappingReservations = await this.reservationRepository
+      .createQueryBuilder('r')
+      .where('r.doctorUserId = :doctorId', {
+        doctorId: reservation.doctor.userId,
+      })
+      .andWhere('r.startDate < :end')
+      .andWhere('r.endDate > :start')
+      .setParameters({
+        start: reservation.startDate,
+        end: reservation.endDate,
+      })
+      .andWhere('r.status = :status', { status: ReservationStatus.CONFIRMED })
+
+      .getOne();
+
+    if (overlappingReservations)
+      throw new ConflictException(
+        'Impossible confirm that reservation, another confirmed reservation already exists',
+      );
+  }
 
   private async ensureSlotNotBooked(doctor: Doctor, startTime: Date) {
     const found = await this.reservationRepository.findOne({

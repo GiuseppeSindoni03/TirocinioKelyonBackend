@@ -45,11 +45,24 @@ export class AvailabilityService {
     return this.availabilityRepository.save(availability);
   }
 
-  async getAvailabilities(doctor: Doctor): Promise<GroupedAvailabilities[]> {
-    const allSlots = await this.availabilityRepository.find({
-      where: { doctor },
-      order: { startTime: 'ASC' },
-    });
+  async getAvailabilities(
+    doctor: Doctor,
+    start: Date,
+    end: Date,
+  ): Promise<GroupedAvailabilities[]> {
+    const query = this.availabilityRepository
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.doctor', 'doctor')
+      .where('a.doctorUserId = :doctorId', { doctorId: doctor.userId });
+
+    if (start && end) {
+      query.andWhere('(a.startTime < :end AND a.endTime > :start)', {
+        start,
+        end,
+      });
+    }
+
+    const allSlots = await query.orderBy('a.startTime', 'ASC').getMany();
 
     const grouped = allSlots.reduce(
       (acc, slot) => {
