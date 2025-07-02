@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   Req,
   Res,
@@ -21,6 +22,11 @@ import { UserItem } from 'src/common/types/userItem';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @Get()
+  async checkEmailExists(email: string) {
+    return this.authService.checkEmailExists(email);
+  }
 
   @UseInterceptors(BaseUserInterceptor)
   @Post('/signup')

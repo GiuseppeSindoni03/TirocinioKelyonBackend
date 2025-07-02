@@ -43,6 +43,37 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  async checkEmailExists(email: string) {
+    const exist = await this.userRepository.findOne({
+      where: { email: email },
+    });
+
+    return {
+      exist: !!exist,
+      message: exist ? 'Email already used' : 'Email available',
+    };
+  }
+  async checkPhoneExist(phone: string) {
+    const exist = await this.userRepository.findOne({
+      where: { phone: phone },
+    });
+
+    return {
+      exist: !!exist,
+      message: exist ? 'Phone already used' : 'Phone available',
+    };
+  }
+  async checkCfExist(cf: string) {
+    const exist = await this.userRepository.findOne({
+      where: { cf: cf },
+    });
+
+    return {
+      exist: !!exist,
+      message: exist ? 'CF already used' : 'CF available',
+    };
+  }
+
   async signUp(
     info: DoctorRegisterDto,
     deviceInfo: DeviceInfo,

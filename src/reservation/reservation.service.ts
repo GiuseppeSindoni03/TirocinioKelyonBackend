@@ -33,6 +33,19 @@ export class ReservationService {
     private readonly visitTypeRepository: Repository<VisitType>,
   ) {}
 
+  async getHowManyPendingReservations(
+    doctor: Doctor,
+  ): Promise<{ total: number }> {
+    const count = await this.reservationRepository.count({
+      where: {
+        doctor: doctor,
+        status: ReservationStatus.PENDING,
+      },
+    });
+
+    return { total: count };
+  }
+
   async getReservations(
     doctor: Doctor,
     status: string,
@@ -52,9 +65,13 @@ export class ReservationService {
       query.andWhere('r.status = :status', {
         status: ReservationStatus.CONFIRMED,
       });
-    } else {
+    } else if (normalizedStatus === ReservationStatus.ALL) {
       query.andWhere('r.status != :status', {
         status: ReservationStatus.DECLINED,
+      });
+    } else {
+      query.andWhere('r.status = :status', {
+        status: ReservationStatus.PENDING,
       });
     }
 
@@ -65,7 +82,7 @@ export class ReservationService {
       });
     }
 
-    const reservations = await query.orderBy('r.startDate', 'ASC').getMany();
+    const reservations = await query.orderBy('r.startDate', 'DESC').getMany();
 
     const grouped: Record<string, ReservationsDTO[]> = {};
 

@@ -78,11 +78,9 @@ export class DoctorService {
   ): Promise<PatientsResponse> {
     const doctor = await this.getDoctorOrThrow(userId);
 
-    const [patients, total] = await this.patientRepository.findAndCount({
+    const allPatients = await this.patientRepository.find({
       where: { doctor: { userId: doctor.userId } },
       relations: ['user'],
-      skip: (page - 1) * limit,
-      take: limit,
     });
 
     const invites = await this.inviteRepository.find({
@@ -92,7 +90,7 @@ export class DoctorService {
 
     // console.log('Lista di Pazienti: ', patients);
 
-    const mapped = patients.map((patient): PatientItem => {
+    const mapped = allPatients.map((patient): PatientItem => {
       if (patient.user) {
         const { password, ...safeUser } = patient.user;
 
@@ -137,25 +135,39 @@ export class DoctorService {
         injuries: patient.injuries,
       };
     });
+    console.log('Search:', `{ ${search} }`);
+    const filtered =
+      search && search !== ''
+        ? mapped.filter((p) => {
+            const user = p.user;
+            if (!user) return false;
 
-    const filtered = search
-      ? mapped.filter((p) => {
-          const user = p.user;
-          if (!user) return false;
+            const searchLower = search.toLowerCase();
+            return (
+              user.name?.toLowerCase().includes(searchLower) ||
+              user.surname?.toLowerCase().includes(searchLower) ||
+              user.email?.toLowerCase().includes(searchLower) ||
+              user.cf?.toLowerCase().includes(searchLower)
+            );
+          })
+        : mapped;
 
-          const searchLower = search.toLowerCase();
-          return (
-            user.name?.toLowerCase().includes(searchLower) ||
-            user.surname?.toLowerCase().includes(searchLower) ||
-            user.email?.toLowerCase().includes(searchLower) ||
-            user.cf?.toLowerCase().includes(searchLower)
-          );
-        })
-      : mapped;
+    const startIndex = (page - 1) * Number(limit);
+    const endIndex = startIndex + Number(limit);
+    const paginatedData = filtered.slice(startIndex, endIndex);
 
+    console.log('StartIndex: ', startIndex);
+    console.log('EndIndex: ', endIndex);
+    console.log('Paginates data: ', paginatedData);
+    console.log('Filtered: ', filtered[0]);
+    console.log('Filtered length: ', filtered.length);
+    console.log('Mapped: ', mapped[0]);
+    console.log('Mapped.lentgh: ', mapped.length);
+
+    // 5. Il total deve essere basato sui pazienti FILTRATI
     return {
-      data: filtered,
-      total: total,
+      data: filtered.slice(startIndex, endIndex),
+      total: filtered.length, // ← Questo è il fix principale!
       page,
       limit,
     };

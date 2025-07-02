@@ -40,8 +40,8 @@ export class ReservationController {
   @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
   async getReservations(
     @GetUser() user: UserItem,
-    @Query('start', new ParseDatePipe()) start: Date,
-    @Query('end', new ParseDatePipe()) end: Date,
+    @Query('start') start: Date,
+    @Query('end') end: Date,
 
     @Query(
       'status',
@@ -54,14 +54,26 @@ export class ReservationController {
       throw new UnauthorizedException('You are not a doctor');
     }
 
-    console.log(status);
-
+    console.log('Status:', status);
+    console.log('Start:', start);
+    console.log('End:', end);
+    console.log('Query params:', { start, end, status });
     return this.reservationService.getReservations(
       user.doctor,
       status,
       start,
       end,
     );
+  }
+
+  @Get('/count')
+  @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
+  async getHowManyPendingReservations(@GetUser() user: UserItem) {
+    if (!user.doctor) {
+      throw new UnauthorizedException('You are not a doctor');
+    }
+
+    return this.reservationService.getHowManyPendingReservations(user.doctor);
   }
 
   @Post()
