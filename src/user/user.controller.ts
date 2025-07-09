@@ -1,20 +1,24 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Req,
+  Res,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserService } from './user.service';
 import { GetUser } from 'src/auth/get-user-decorator';
+import { BaseUserInterceptor } from 'src/transform.interceptor';
 
 @Controller('user')
 @UseGuards(RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseInterceptors(BaseUserInterceptor)
   @Get('/me')
-  getMe(@GetUser() user, @Req() req) {
-    // console.log(user);
-    // console.log(req.user);
-
-    // console.log('COOKIES:', req.cookies);
-    // console.log('USER:', user);
+  async getMe(@GetUser() user, @Req() req) {
     return this.userService.getMe(user.id);
   }
 }

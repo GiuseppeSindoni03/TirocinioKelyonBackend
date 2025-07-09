@@ -17,6 +17,8 @@ import * as bcrypt from 'bcryptjs';
 import { addDays } from 'date-fns';
 import { UserRoles } from 'src/common/enum/roles.enum';
 import { UserItem } from 'src/common/types/userItem';
+import { InviteResponseDto } from './dto/invite-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class InviteService {
@@ -68,6 +70,15 @@ export class InviteService {
     return { patientId: patient.id };
   }
 
+  async getInvite(inviteId: string): Promise<InviteResponseDto> {
+    const invite = await this.findAndValidate(inviteId);
+
+    console.log('Invite: ', invite);
+    return plainToInstance(InviteResponseDto, invite, {
+      excludeExtraneousValues: true,
+    });
+  }
+
   async acceptInvite(
     data: AcceptInviteDto,
     inviteId: string,
@@ -75,7 +86,7 @@ export class InviteService {
   ): Promise<{ message: string }> {
     const invite = await this.findAndValidate(inviteId);
 
-    console.log(invite);
+    console.log('Invito accettato:', invite);
 
     const hashedPassword = await this.hashPassword(data.password);
     const user = await this.createUserPatient(data, hashedPassword);
@@ -88,6 +99,7 @@ export class InviteService {
 
     await this.markInviteAsUsed(inviteId);
 
+    console.log('Tutt appost fratm');
     return {
       message: 'Invite accept successfully',
     };
@@ -115,7 +127,7 @@ export class InviteService {
       bloodType: createInviteDto.bloodType,
       level: createInviteDto.level,
       sport: createInviteDto.sport,
-      patologies: createInviteDto.patologies,
+      pathologies: createInviteDto.patologies,
       medications: createInviteDto.medications,
       injuries: createInviteDto.injuries,
       doctor: doctor,

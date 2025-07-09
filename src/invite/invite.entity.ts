@@ -64,7 +64,7 @@ export class Invite {
   sport: string;
 
   @Column('text', { array: true })
-  patologies: string[];
+  pathologies: string[];
 
   @Column('text', { array: true })
   medications: string[];

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   ParseUUIDPipe,
   Post,
@@ -16,6 +17,8 @@ import { AcceptInviteDto } from '../invite/dto/accept-invite.dto';
 import { GetUser } from 'src/auth/get-user-decorator';
 import { UserItem } from 'src/common/types/userItem';
 import { UserRoles } from 'src/common/enum/roles.enum';
+import { plainToInstance } from 'class-transformer';
+import { InviteResponseDto } from './dto/invite-response.dto';
 
 @Controller('invite')
 @UseGuards(RolesGuard)
@@ -43,5 +46,18 @@ export class InviteController {
       inviteId,
       //,user
     );
+  }
+
+  @Get('/:id')
+  async getInvite(
+    @Param('id', new ParseUUIDPipe())
+    inviteId: string,
+  ) {
+    const invite = await this.inviteService.getInvite(inviteId);
+
+    console.log('Invite Controller: ', invite);
+    return plainToInstance(InviteResponseDto, invite, {
+      excludeExtraneousValues: true,
+    });
   }
 }

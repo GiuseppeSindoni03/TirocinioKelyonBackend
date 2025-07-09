@@ -4,16 +4,12 @@ import { Patient } from './patient.entity';
 import { PatientService } from './patient.service';
 import { PatientController } from './patient.controller';
 import { IsCodiceFiscaleConstraint } from 'src/auth/validators/codiceFiscale.validator';
+import { User } from 'src/user/user.entity';
+import { Doctor } from 'src/doctor/doctor.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Patient
-    ])], 
-  providers: [
-    PatientService,
-    IsCodiceFiscaleConstraint,
-  ],
+  imports: [TypeOrmModule.forFeature([Patient, User, Doctor])],
+  providers: [PatientService, IsCodiceFiscaleConstraint],
   controllers: [PatientController],
   exports: [],
 })

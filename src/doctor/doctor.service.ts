@@ -130,7 +130,7 @@ export class DoctorService {
         bloodType: patient.bloodType,
         level: patient.level,
         sport: patient.sport,
-        patologies: patient.patologies,
+        pathologies: patient.pathologies,
         medications: patient.medications,
         injuries: patient.injuries,
       };
@@ -176,6 +176,7 @@ export class DoctorService {
   async getPatientById(patientId: string): Promise<PatientItem> {
     const patient = await this.patientRepository.findOne({
       where: { id: patientId },
+      relations: ['user'],
     });
 
     if (!patient) throw new BadRequestException("Patient doesn't exist.");
@@ -223,7 +224,7 @@ export class DoctorService {
       bloodType: patient.bloodType,
       level: patient.level,
       sport: patient.sport,
-      patologies: patient.patologies,
+      pathologies: patient.pathologies,
       medications: patient.medications,
       injuries: patient.injuries,
     };

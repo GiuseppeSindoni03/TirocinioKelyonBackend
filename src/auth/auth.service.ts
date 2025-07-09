@@ -21,6 +21,7 @@ import { LogoutDto } from './dto/logout.dto';
 import { UserRoles } from 'src/common/enum/roles.enum';
 import { UserItem } from 'src/common/types/userItem';
 import { addDays } from 'date-fns';
+import { Patient } from 'src/patient/patient.entity';
 
 interface AuthResponse {
   accessToken: string;
@@ -39,6 +40,9 @@ export class AuthService {
 
     @InjectRepository(Doctor)
     private readonly doctorRepository: Repository<Doctor>,
+
+    @InjectRepository(Patient)
+    private readonly patientRepository: Repository<Patient>,
 
     private jwtService: JwtService,
   ) {}
@@ -110,7 +114,9 @@ export class AuthService {
   ): Promise<AuthResponse> {
     const { email, password } = credentials;
 
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
@@ -122,9 +128,17 @@ export class AuthService {
         where: { userId: user.id },
       });
 
-      if (!doctor) throw new NotFoundException('Doctor info not found');
+      if (!doctor) throw new NotFoundException("Doctor's info not found");
 
       finalUser.doctor = doctor;
+    } else {
+      const patient = await this.patientRepository.findOne({
+        where: { user: user },
+      });
+
+      if (!patient) throw new NotFoundException("Patient's info not found");
+
+      finalUser.patient = patient;
     }
 
     const session = await this.createSession(user, deviceInfo);

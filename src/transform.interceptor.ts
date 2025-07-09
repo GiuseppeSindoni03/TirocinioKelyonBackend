@@ -17,7 +17,6 @@ export interface ExtendentResponse extends Response {
 @Injectable()
 export class BaseUserInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    console.log('Mario Oliva');
     return next.handle().pipe(
       map((data) => {
         console.log('Data:', data);

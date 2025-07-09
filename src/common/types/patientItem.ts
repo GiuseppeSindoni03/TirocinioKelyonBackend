@@ -1,3 +1,5 @@
+import { UserWithoutPassword } from './doctorItem';
+
 export interface PatientItem {
   id: string;
   weight: number;
@@ -5,23 +7,9 @@ export interface PatientItem {
   bloodType: string;
   level: string;
   sport: string;
-  patologies: string[];
+  pathologies: string[];
   medications: string[];
   injuries: string[];
   inviteId?: string;
-  user: {
-    id: string;
-    name: string;
-    surname: string;
-    email: string;
-    cf: string;
-    birthDate: Date;
-    gender: string;
-    phone: string;
-    role: string;
-    address: string;
-    city: string;
-    cap: string;
-    province: string;
-  };
+  user: UserWithoutPassword;
 }

@@ -51,7 +51,15 @@ export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .exclude({ path: 'auth/*path', method: RequestMethod.ALL })
+      .exclude(
+        { path: 'auth/check/email/:email', method: RequestMethod.GET },
+        { path: 'auth/check/phone/:phone', method: RequestMethod.GET },
+        { path: 'auth/check/cf/:cf', method: RequestMethod.GET },
+        { path: 'auth/signup', method: RequestMethod.POST },
+        { path: 'auth/signin', method: RequestMethod.POST },
+        { path: 'invite/:id', method: RequestMethod.GET },
+        { path: 'invite/:id/accept', method: RequestMethod.POST },
+      )
       .forRoutes('*');
   }
 }

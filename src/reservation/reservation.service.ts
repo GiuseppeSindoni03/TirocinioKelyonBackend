@@ -102,7 +102,7 @@ export class ReservationService {
         visitType: reservation.visitType.name,
         patient: {
           name: reservation.patient.user!!.name,
-          surname: reservation.patient.user!!.name,
+          surname: reservation.patient.user!!.surname,
           id: reservation.patient.id,
           gender: reservation.patient.user!!.gender,
           cf: reservation.patient.user!!.cf,

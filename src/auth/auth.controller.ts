@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   Res,
@@ -13,19 +14,29 @@ import { AuthService } from './auth.service';
 import { DoctorRegisterDto } from './dto/doctor-register.dto';
 
 import { DeviceInfo } from './utils/deviceInfo';
-import { LogoutDto } from './dto/logout.dto';
 import { Request, Response } from 'express';
 
 import { BaseUserInterceptor } from 'src/transform.interceptor';
 import { UserItem } from 'src/common/types/userItem';
+import { GetUser } from './decorators/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Get()
-  async checkEmailExists(email: string) {
+  @Get('/check/email/:email')
+  async checkEmailExists(@Param('email') email: string) {
     return this.authService.checkEmailExists(email);
+  }
+
+  @Get('/check/phone/:phone')
+  async checkPhoneExists(@Param('phone') phone: string) {
+    return this.authService.checkPhoneExist(phone);
+  }
+
+  @Get('/check/cf/:cf')
+  async checkCfExists(@Param('cf') cf: string) {
+    return this.authService.checkCfExist(cf);
   }
 
   @UseInterceptors(BaseUserInterceptor)
@@ -66,6 +77,8 @@ export class AuthController {
       this.getDeviceInfo(req),
     );
 
+    console.log('REQ Cookies: ', req.cookies);
+
     res
       .cookie('jwt', accessToken, {
         httpOnly: true,
@@ -82,7 +95,11 @@ export class AuthController {
   }
 
   @Post('/logout')
-  async logout(@Req() req: Request, @Res() res: Response) {
+  async logout(@GetUser() user, @Req() req: Request, @Res() res: Response) {
+    console.log('Utente che sta facendo il logout:', user);
+
+    console.log('Req Cookie: ', req.cookies);
+
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) throw new UnauthorizedException('Missing refresh token');
 
