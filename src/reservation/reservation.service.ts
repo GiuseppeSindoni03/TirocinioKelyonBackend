@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reservation } from './reservation.entity';
@@ -19,6 +20,7 @@ import { OccupiedSlot } from './types/occupied-slot.interface';
 import { VisitType } from './visit-type.entity';
 import { VisitTypeEnum } from './types/visit-type.enum';
 import { ReservationsDTO } from './types/reservation.dto';
+import { UserItem } from 'src/common/types/userItem';
 
 @Injectable()
 export class ReservationService {
@@ -32,6 +34,22 @@ export class ReservationService {
     @InjectRepository(VisitType)
     private readonly visitTypeRepository: Repository<VisitType>,
   ) {}
+
+  async getNextReservation(user: UserItem) {
+    if (!user.patient) throw new UnauthorizedException();
+
+    const reservation = await this.reservationRepository
+      .createQueryBuilder('r')
+      .where('r.patientId = :id', { id: user.patient.id })
+      .andWhere('r.startDate > :now', { now: new Date() })
+      .andWhere('r.status = :confirmed', {
+        confirmed: ReservationStatus.CONFIRMED,
+      })
+      .orderBy('r.startDate', 'ASC')
+      .getOne();
+
+    return reservation;
+  }
 
   async getHowManyPendingReservations(
     doctor: Doctor,

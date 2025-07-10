@@ -156,4 +156,10 @@ export class ReservationController {
 
     return localSlots;
   }
+
+  @Get('/next-reservation')
+  @Roles(UserRoles.PATIENT)
+  async getLastReservation(@GetUser() user: UserItem) {
+    return this.reservationService.getNextReservation(user);
+  }
 }
