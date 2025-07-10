@@ -1,5 +1,3 @@
-import { VisitType } from '../visit-type.entity';
-
 export interface ReservationsDTO {
   id: string;
   startTime: string;

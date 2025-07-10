@@ -21,6 +21,7 @@ import { VisitType } from './visit-type.entity';
 import { VisitTypeEnum } from './types/visit-type.enum';
 import { ReservationsDTO } from './types/reservation.dto';
 import { UserItem } from 'src/common/types/userItem';
+import { ReservationResponse } from './dto/reservation-response.dto';
 
 @Injectable()
 export class ReservationService {
@@ -35,11 +36,14 @@ export class ReservationService {
     private readonly visitTypeRepository: Repository<VisitType>,
   ) {}
 
-  async getNextReservation(user: UserItem) {
+  async getNextReservation(
+    user: UserItem,
+  ): Promise<ReservationResponse | null> {
     if (!user.patient) throw new UnauthorizedException();
 
     const reservation = await this.reservationRepository
       .createQueryBuilder('r')
+      .leftJoinAndSelect('r.visitType', 'visitType')
       .where('r.patientId = :id', { id: user.patient.id })
       .andWhere('r.startDate > :now', { now: new Date() })
       .andWhere('r.status = :confirmed', {
@@ -48,7 +52,18 @@ export class ReservationService {
       .orderBy('r.startDate', 'ASC')
       .getOne();
 
-    return reservation;
+    console.log('Reservation: ', reservation);
+
+    if (!reservation) return null;
+
+    return {
+      id: reservation.id,
+      createdAt: reservation.createdAt.toISOString(),
+      endTime: reservation.endDate.toISOString(),
+      startTime: reservation.startDate.toISOString(),
+      visitType: reservation.visitType.name,
+      status: reservation.status,
+    };
   }
 
   async getHowManyPendingReservations(
