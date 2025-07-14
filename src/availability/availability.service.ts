@@ -99,7 +99,7 @@ export class AvailabilityService {
 
     return this.availabilityRepository
       .createQueryBuilder('a')
-      .where('a.doctorId = :doctorId', { doctorId: doctor.userId })
+      .where('a.doctorUserId = :doctorId', { doctorId: doctor.userId })
       .andWhere('a.startTime BETWEEN :start AND :end', { start, end })
       .orderBy('a.startTime', 'ASC')
       .getMany();

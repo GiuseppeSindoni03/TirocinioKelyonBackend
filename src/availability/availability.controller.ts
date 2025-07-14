@@ -38,7 +38,6 @@ export class AvailabilityController {
     return this.availabilityService.createAvailability(body, doctor.userId);
   }
 
-  // mi immagino serva tipo quando compare l'intero calendario
   @Get()
   @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
   async getAvailabilities(

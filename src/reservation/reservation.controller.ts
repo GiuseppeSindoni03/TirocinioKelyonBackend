@@ -23,12 +23,13 @@ import { UserItem } from 'src/common/types/userItem';
 import { UserRoles } from 'src/common/enum/roles.enum';
 import { VisitTypeEnum } from './types/visit-type.enum';
 import * as moment from 'moment-timezone';
-import { ReservationStatus } from './types/reservation-status-enum';
+import { stat } from 'fs';
 
 enum ReservationQueryFilter {
   ALL = 'ALL',
   CONFIRMED = 'CONFIRMED',
   PENDING = 'PENDING',
+  DECLINED = 'DECLINED',
 }
 
 @Controller('reservations')
@@ -66,6 +67,28 @@ export class ReservationController {
     );
   }
 
+  @Get('/patient')
+  @Roles(UserRoles.PATIENT)
+  async getPastReservationsPatient(
+    @GetUser() user: UserItem,
+    @Query(
+      'status',
+      new DefaultValuePipe('ALL'),
+      new ParseEnumPipe(ReservationQueryFilter),
+    )
+    status: ReservationQueryFilter,
+  ) {
+    if (!user.patient) {
+      throw new UnauthorizedException('You are not a patient');
+    }
+
+    return this.reservationService.getPastReservationsPatient(
+      user.patient.doctor,
+      status,
+      user.patient,
+    );
+  }
+
   @Get('/count')
   @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
   async getHowManyPendingReservations(@GetUser() user: UserItem) {
@@ -82,6 +105,8 @@ export class ReservationController {
     @GetUser() user: UserItem,
     @Body() body: CreateReservationDto,
   ) {
+    console.log('Body: ', body);
+
     if (!user.patient) {
       throw new UnauthorizedException('You are not a patient.');
     }
@@ -159,7 +184,16 @@ export class ReservationController {
 
   @Get('/next-reservation')
   @Roles(UserRoles.PATIENT)
-  async getLastReservation(@GetUser() user: UserItem) {
-    return this.reservationService.getNextReservation(user);
+  async getNestReservations(@GetUser() user: UserItem) {
+    console.log('1) Sto chiamando next reservations');
+    return this.reservationService.getNextReservations(user);
+  }
+
+  @Get('isFirstVisit')
+  @Roles(UserRoles.PATIENT)
+  async isFirstVisit(@GetUser() user: UserItem) {
+    if (!user.patient) throw new UnauthorizedException();
+
+    return this.reservationService.isFirstVisit(user.patient);
   }
 }

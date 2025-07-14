@@ -44,7 +44,7 @@ export class PatientController {
       user: doctorUserDto,
     };
 
-    console.log('Response: ', response);
+    console.log('Doctor: ', response);
 
     return response;
   }
