@@ -11,6 +11,7 @@ import {
   Patch,
   Post,
   Query,
+  Search,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -67,6 +68,28 @@ export class ReservationController {
     );
   }
 
+  @Get('/:patient')
+  @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
+  async getReservationsPatient(
+    @GetUser() user: UserItem,
+    @Param('patient', new ParseUUIDPipe()) patientId: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('search') search: string,
+  ) {
+    if (!user.doctor) {
+      throw new UnauthorizedException('You are not a doctor');
+    }
+
+    return this.reservationService.getReservationsPatient(
+      user.doctor,
+      patientId,
+      page,
+      limit,
+      search,
+    );
+  }
+
   @Get('/patient')
   @Roles(UserRoles.PATIENT)
   async getPastReservationsPatient(
@@ -95,6 +118,8 @@ export class ReservationController {
     if (!user.doctor) {
       throw new UnauthorizedException('You are not a doctor');
     }
+
+    console.log('Sono dentro Count');
 
     return this.reservationService.getHowManyPendingReservations(user.doctor);
   }

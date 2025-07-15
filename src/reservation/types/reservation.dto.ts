@@ -1,10 +1,4 @@
-export interface ReservationsDTO {
-  id: string;
-  startTime: string;
-  endTime: string;
-  createdAt: string;
-  status: string;
-  visitType: string;
+export interface ReservationsDTO extends ReservationPatientDTO {
   patient: {
     id: string;
     name: string;
@@ -12,4 +6,13 @@ export interface ReservationsDTO {
     cf: string;
     gender: string;
   };
+}
+
+export interface ReservationPatientDTO {
+  id: string;
+  startTime: string;
+  endTime: string;
+  createdAt: string;
+  status: string;
+  visitType: string;
 }

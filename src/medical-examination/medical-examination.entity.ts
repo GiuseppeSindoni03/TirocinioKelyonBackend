@@ -4,6 +4,7 @@ import { Reservation } from 'src/reservation/reservation.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -34,6 +35,7 @@ export class MedicalExamination {
   })
   doctor: Doctor;
 
-  @OneToOne(() => Reservation, { onDelete: 'CASCADE' })
+  @OneToOne(() => Reservation, { onDelete: 'CASCADE', cascade: false })
+  @JoinColumn()
   reservation: Reservation;
 }

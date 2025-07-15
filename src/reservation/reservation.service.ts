@@ -19,9 +19,13 @@ import { TimeSlot } from './types/time-slot.interface';
 import { OccupiedSlot } from './types/occupied-slot.interface';
 import { VisitType } from './visit-type.entity';
 import { VisitTypeEnum } from './types/visit-type.enum';
-import { ReservationsDTO } from './types/reservation.dto';
+import {
+  ReservationPatientDTO,
+  ReservationsDTO,
+} from './types/reservation.dto';
 import { UserItem } from 'src/common/types/userItem';
 import { ReservationResponse } from './dto/reservation-response.dto';
+import { MedicalExamination } from 'src/medical-examination/medical-examination.entity';
 
 @Injectable()
 export class ReservationService {
@@ -95,6 +99,8 @@ export class ReservationService {
       },
     });
 
+    console.log('Sono dentro count:', count);
+
     return { total: count };
   }
 
@@ -148,6 +154,48 @@ export class ReservationService {
       status: reservation.status,
       visitType: reservation.visitType.name,
     }));
+  }
+
+  async getReservationsPatient(
+    doctor: Doctor,
+    patientId: string,
+    page: number = 1,
+    limit: number = 12,
+    search: string,
+  ): Promise<{ total: number; reservations: ReservationPatientDTO[] }> {
+    const query = this.reservationRepository
+      .createQueryBuilder('r')
+      .leftJoinAndSelect('r.visitType', 'visitType')
+      .leftJoin(MedicalExamination, 'me', 'me.reservationId = r.id')
+      .where('r.doctorUserId = :doctor', { doctor: doctor.userId })
+      .andWhere('r.patientId = :id', { id: patientId })
+      .andWhere('r.status = :status', { status: ReservationStatus.CONFIRMED })
+      .andWhere('me.id IS NULL')
+      .orderBy('r.startDate', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const total = await query.clone().getCount();
+
+    const reservations = await query.getMany();
+
+    const response: ReservationPatientDTO[] = reservations.map(
+      (reservation) => {
+        return {
+          id: reservation.id,
+          startTime: reservation.startDate.toISOString(),
+          endTime: reservation.endDate.toISOString(),
+          createdAt: reservation.createdAt.toISOString(),
+          status: reservation.status,
+          visitType: reservation.visitType.name,
+        };
+      },
+    );
+
+    return {
+      reservations: response,
+      total,
+    };
   }
 
   async getReservations(

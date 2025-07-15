@@ -1,4 +1,13 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -6,6 +15,9 @@ import { Roles } from 'src/auth/decorators/role.decorator';
 import { UserRoles } from 'src/common/enum/roles.enum';
 import { GetUser } from 'src/auth/get-user-decorator';
 import { UserItem } from 'src/common/types/userItem';
+import { User } from 'src/user/user.entity';
+import { MedicalExaminationDTO } from 'src/invite/dto/medical-examination.dto';
+import { Reservation } from 'src/reservation/reservation.entity';
 
 @Controller('doctor')
 @UseGuards(RolesGuard)
