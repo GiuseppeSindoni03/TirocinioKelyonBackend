@@ -52,6 +52,8 @@ export class ReservationController {
     )
     status: ReservationQueryFilter,
   ) {
+    console.log('Sono dentro GET reservations');
+
     if (!user.doctor) {
       throw new UnauthorizedException('You are not a doctor');
     }
@@ -65,28 +67,6 @@ export class ReservationController {
       status,
       start,
       end,
-    );
-  }
-
-  @Get('/:patient')
-  @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
-  async getReservationsPatient(
-    @GetUser() user: UserItem,
-    @Param('patient', new ParseUUIDPipe()) patientId: string,
-    @Query('page') page: number,
-    @Query('limit') limit: number,
-    @Query('search') search: string,
-  ) {
-    if (!user.doctor) {
-      throw new UnauthorizedException('You are not a doctor');
-    }
-
-    return this.reservationService.getReservationsPatient(
-      user.doctor,
-      patientId,
-      page,
-      limit,
-      search,
     );
   }
 
@@ -214,11 +194,35 @@ export class ReservationController {
     return this.reservationService.getNextReservations(user);
   }
 
-  @Get('isFirstVisit')
+  @Get('/isFirstVisit')
   @Roles(UserRoles.PATIENT)
   async isFirstVisit(@GetUser() user: UserItem) {
     if (!user.patient) throw new UnauthorizedException();
 
     return this.reservationService.isFirstVisit(user.patient);
+  }
+
+  @Get('/:patient')
+  @Roles(UserRoles.DOCTOR, UserRoles.ADMIN)
+  async getReservationsPatient(
+    @GetUser() user: UserItem,
+    @Param('patient', new ParseUUIDPipe()) patientId: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('search') search: string,
+  ) {
+    console.log('Sono dentro GET reservations/:patient');
+
+    if (!user.doctor) {
+      throw new UnauthorizedException('You are not a doctor');
+    }
+
+    return this.reservationService.getReservationsPatient(
+      user.doctor,
+      patientId,
+      page,
+      limit,
+      search,
+    );
   }
 }

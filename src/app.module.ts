@@ -11,6 +11,7 @@ import { InviteModule } from './invite/invite.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { AuthMiddleware } from './auth/middleware/auth.middleware';
+import { MedicalDetectionModule } from './medical-detection/medical-detection.module';
 // import { BaseUserInterceptor } from './transform.interceptor';
 // import { APP_INTERCEPTOR } from '@nestjs/core';
 
@@ -43,6 +44,7 @@ import { AuthMiddleware } from './auth/middleware/auth.middleware';
     InviteModule,
     AvailabilityModule,
     ReservationModule,
+    MedicalDetectionModule,
   ],
   controllers: [],
   // providers: [{ useClass: BaseUserInterceptor, provide: APP_INTERCEPTOR }],

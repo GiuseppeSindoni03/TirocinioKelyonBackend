@@ -484,7 +484,7 @@ export class ReservationService {
     console.log(validAvailability);
 
     if (!validAvailability) {
-      console.log(
+      console.error(
         'The reservation must be within an available time slot for the doctor.',
       );
       throw new BadRequestException(
