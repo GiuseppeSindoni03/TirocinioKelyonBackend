@@ -7,8 +7,8 @@ export class MedicalDetection {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  value: Number;
+  @Column({ type: 'numeric' })
+  value: number;
 
   @Column()
   type: MedicalDetectionType;
@@ -18,6 +18,6 @@ export class MedicalDetection {
   })
   patient: Patient;
 
-  @Column()
+  @Column({ type: 'timestamptz' })
   date: Date;
 }

@@ -3,7 +3,9 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  Param,
   ParseEnumPipe,
+  ParseUUIDPipe,
   Post,
   Query,
   UnauthorizedException,
@@ -14,20 +16,15 @@ import { MedicalDetectionService } from './medical-detection.service';
 import { Roles } from 'src/auth/decorators/role.decorator';
 import { UserRoles } from 'src/common/enum/roles.enum';
 import { GetUser } from 'src/auth/get-user-decorator';
-import { userInfo } from 'os';
 import { UserItem } from 'src/common/types/userItem';
 import { MedicalDetectionType } from './type/medical-detection-type.enum';
-
-export interface MedicalDetectionDTO {
-  value: number;
-  type: MedicalDetectionType;
-}
+import { MedicalDetectionDTO } from './type/medical-detection.dto';
 
 export enum MedicalDetectionQueryFilter {
   WEIGHT = 'WEIGHT',
   SPO2 = 'SPO2',
   HR = 'HR',
-  TEMPERAATURE = 'TEMPERATURE',
+  TEMPERATURE = 'TEMPERATURE',
   ALL = 'ALL',
 }
 
@@ -55,12 +52,49 @@ export class MedicalDetectionController {
   ) {
     if (!user.patient) throw new UnauthorizedException();
 
-    return this.medicalDetectionService.getMedicalDetections(
-      user,
+    const d = await this.medicalDetectionService.getMedicalDetections(
+      user.patient.id,
       type,
       startDate,
       endDate,
     );
+
+    console.log('Result:', d);
+
+    return d;
+  }
+
+  @Get('patient/:patientId')
+  @Roles(UserRoles.DOCTOR)
+  async getMedicalDetectionsPatient(
+    @GetUser() user: UserItem,
+    @Param('patientId', new ParseUUIDPipe()) patientId: string,
+
+    @Query(
+      'type',
+      new DefaultValuePipe('ALL'),
+      new ParseEnumPipe(MedicalDetectionQueryFilter),
+    )
+    type,
+    @Query('startDate')
+    startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    if (!user.doctor) {
+      console.error('Bruh non hai il dottore');
+      throw new UnauthorizedException();
+    }
+
+    const d = await this.medicalDetectionService.getMedicalDetections(
+      patientId,
+      type,
+      startDate,
+      endDate,
+    );
+
+    console.log('Result:', d);
+
+    return d;
   }
 
   @Post()
@@ -84,8 +118,13 @@ export class MedicalDetectionController {
     @Query('type', new ParseEnumPipe(MedicalDetectionType))
     type: MedicalDetectionType,
   ) {
+    console.log(' Sono dentro man');
     if (!user.patient) throw new UnauthorizedException();
 
-    return this.medicalDetectionService.getLastDetection(user, type);
+    const d = await this.medicalDetectionService.getLastDetection(user, type);
+
+    console.log('Result:', d);
+
+    return d;
   }
 }
