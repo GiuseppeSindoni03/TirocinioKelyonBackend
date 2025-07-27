@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   Post,
+  Query,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -23,17 +25,37 @@ export class MedicalExaminationController {
 
   @Post('/:reservationId')
   @Roles(UserRoles.DOCTOR)
-  postMedicalExamination(
+  async postMedicalExamination(
     @GetUser() user: UserItem,
     @Param('reservationId') reservationId: string,
     @Body() medicalExamination: MedicalExaminationDTO,
   ) {
     if (!user.doctor) throw new UnauthorizedException();
 
-    return this.medicalExaminationService.addMedicalExamination(
+    return await this.medicalExaminationService.addMedicalExamination(
       user,
       reservationId,
       medicalExamination,
+    );
+  }
+
+  @Get('/:patientId')
+  @Roles(UserRoles.DOCTOR)
+  async getMedicalExaminations(
+    @GetUser() user: UserItem,
+    @Param('patientId') patientId: string,
+    @Query('limit') limit: number = 3,
+    @Query('cursor') cursor?: string,
+  ) {
+    if (!user.doctor) {
+      throw new UnauthorizedException();
+    }
+
+    return this.medicalExaminationService.getMedicalDetections(
+      user.id,
+      patientId,
+      limit,
+      cursor,
     );
   }
 }

@@ -39,7 +39,7 @@ export class MedicalDetectionService {
       throw new NotFoundException();
     }
 
-    console.log('Patient: ', patient);
+    // console.log('Patient: ', patient);
 
     const query = this.medicalDetectionRepository
       .createQueryBuilder('d')
@@ -57,15 +57,15 @@ export class MedicalDetectionService {
       query.andWhere('d.date <= :endDate', { endDate });
     }
 
-    query.orderBy('d.date', 'DESC');
+    query.orderBy('d.date', 'ASC');
 
     const [detections, total] = await query.getManyAndCount();
 
-    console.log('StartDate:', startDate);
-    console.log('EndDate:', endDate);
-    console.log('Type: ', type);
+    // console.log('StartDate:', startDate);
+    // console.log('EndDate:', endDate);
+    // console.log('Type: ', type);
 
-    console.log('Detections: ', detections);
+    // console.log('Detections: ', detections);
 
     if (total === 0)
       throw new NotFoundException(`There arent't detections for ${type}`);
