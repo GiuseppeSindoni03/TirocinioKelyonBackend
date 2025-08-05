@@ -90,7 +90,7 @@ export class CreateInviteDto {
   bloodType: string;
 
   @IsArray()
-  patologies: string[];
+  pathologies: string[];
 
   @IsArray()
   medications: string[];

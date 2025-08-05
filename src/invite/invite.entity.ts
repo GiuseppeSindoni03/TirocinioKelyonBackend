@@ -1,3 +1,4 @@
+import { IsOptional } from 'class-validator';
 import { Gender } from 'src/auth/dto/gender-enum';
 import { Doctor } from 'src/doctor/doctor.entity';
 import { Patient } from 'src/patient/patient.entity';
@@ -64,12 +65,15 @@ export class Invite {
   sport: string;
 
   @Column('text', { array: true })
+  @IsOptional()
   pathologies: string[];
 
   @Column('text', { array: true })
+  @IsOptional()
   medications: string[];
 
   @Column('text', { array: true })
+  @IsOptional()
   injuries: string[];
 
   @Column({ default: false })

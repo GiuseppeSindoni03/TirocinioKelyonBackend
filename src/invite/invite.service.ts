@@ -127,7 +127,7 @@ export class InviteService {
       bloodType: createInviteDto.bloodType,
       level: createInviteDto.level,
       sport: createInviteDto.sport,
-      pathologies: createInviteDto.patologies,
+      pathologies: createInviteDto.pathologies,
       medications: createInviteDto.medications,
       injuries: createInviteDto.injuries,
       doctor: doctor,
