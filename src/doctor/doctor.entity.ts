@@ -1,5 +1,5 @@
-import { User } from 'src/user/user.entity';
-import { MedicalExamination } from 'src/medical-examination/medical-examination.entity';
+import { User } from '../user/user.entity';
+import { MedicalExamination } from '../medical-examination/medical-examination.entity';
 import {
   Column,
   Entity,
@@ -8,8 +8,8 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { Availability } from 'src/availability/availability.entity';
-import { Reservation } from 'src/reservation/reservation.entity';
+import { Availability } from '../availability/availability.entity';
+import { Reservation } from '../reservation/reservation.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity()

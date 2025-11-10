@@ -19,7 +19,7 @@ import { MedicalDetectionModule } from './medical-detection/medical-detection.mo
   imports: [
     ConfigModule.forRoot({
       envFilePath: [`.env.stage.${process.env.STAGE}`],
-      validationSchema: configValidationSchema,
+      // validationSchema: configValidationSchema,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -28,11 +28,13 @@ import { MedicalDetectionModule } from './medical-detection/medical-detection.mo
         type: 'postgres',
         autoLoadEntities: true,
         synchronize: true,
-        host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
+        // host: configService.get('DB_HOST'),
+        // port: configService.get('DB_PORT'),
+        // username: configService.get('DB_USERNAME'),
+        // password: configService.get('DB_PASSWORD'),
+        // database: configService.get('DB_DATABASE'),
+        url: configService.get<string>('DATABASE_URL'),
+
         //logging: 'all',
       }),
     }),

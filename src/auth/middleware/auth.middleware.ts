@@ -35,6 +35,10 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     //console.log('AuthMiddleware attivato su:', req.path);
 
+    console.log('🌍 Origin:', req.headers.origin);
+    console.log('🍪 Cookies:', req.cookies);
+    console.log('🔑 JWT:', req.cookies?.jwt ? 'presente' : 'MANCANTE');
+
     const accessToken = req.cookies?.jwt;
     const refreshToken = req.cookies?.refreshToken;
 
@@ -48,7 +52,7 @@ export class AuthMiddleware implements NestMiddleware {
 
       res.cookie('jwt', accessToken, {
         httpOnly: true,
-        secure: true,
+        // secure: true,
         sameSite: 'lax',
       });
 
@@ -67,7 +71,7 @@ export class AuthMiddleware implements NestMiddleware {
 
           res.cookie('jwt', newAccessToken, {
             httpOnly: true,
-            secure: true,
+            // secure: true,
             sameSite: 'lax',
           });
 

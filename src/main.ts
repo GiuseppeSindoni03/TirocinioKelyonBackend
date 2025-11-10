@@ -7,11 +7,25 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const logger = new Logger();
   const app = await NestFactory.create(AppModule);
-  app.use(cookieParser());
+
+  app.use((req, res, next) => {
+    logger.log(`${req.method} ${req.url} - IP: ${req.ip}`);
+    next();
+  });
+
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:8080'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:4200',
+      'http://192.168.1.16:4200',
+      'http://192.168.1.16',
+    ],
+
     credentials: true,
   });
+
+  app.use(cookieParser());
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Trasforma i payload in DTO automaticamente
@@ -20,7 +34,13 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
-  logger.log(`Application listening on port ${process.env.PORT ?? 3000}`);
+  const port = process.env.PORT ?? 3000;
+
+  // Ascolta su tutte le interfacce di rete
+  await app.listen(port, '0.0.0.0');
+
+  logger.log(`Application listening on port ${port}`);
+  logger.log(`Local: http://localhost:${port}`);
+  logger.log(`Network: http://192.168.1.15:${port}`);
 }
 bootstrap();

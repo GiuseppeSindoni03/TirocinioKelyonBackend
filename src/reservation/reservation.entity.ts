@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ReservationStatus } from './types/reservation-status-enum';
-import { Patient } from 'src/patient/patient.entity';
-import { Doctor } from 'src/doctor/doctor.entity';
+import { Patient } from '../patient/patient.entity';
+import { Doctor } from '../doctor/doctor.entity';
 import { VisitType } from './visit-type.entity';
 
 @Entity()

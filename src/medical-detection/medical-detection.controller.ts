@@ -35,7 +35,6 @@ export class MedicalDetectionController {
     private readonly medicalDetectionService: MedicalDetectionService,
   ) {}
 
-  // Get of my detections { type filter}
   @Get()
   @Roles(UserRoles.PATIENT)
   async getMedicalDetections(

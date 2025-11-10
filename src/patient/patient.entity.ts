@@ -7,10 +7,10 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from 'src/user/user.entity';
-import { MedicalExamination } from 'src/medical-examination/medical-examination.entity';
-import { Doctor } from 'src/doctor/doctor.entity';
-import { Reservation } from 'src/reservation/reservation.entity';
+import { User } from '../user/user.entity';
+import { MedicalExamination } from '../medical-examination/medical-examination.entity';
+import { Doctor } from '../doctor/doctor.entity';
+import { Reservation } from '../reservation/reservation.entity';
 import { PatientLevel } from './types/patient-level.enum';
 import { Exclude } from 'class-transformer';
 

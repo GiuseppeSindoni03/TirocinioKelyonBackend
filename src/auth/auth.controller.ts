@@ -53,13 +53,13 @@ export class AuthController {
     res
       .cookie('jwt', accessToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
+        secure: true, // ✅ false in sviluppo (HTTP)
+        sameSite: 'none', // ✅ 'none' per cross-origin
       })
       .cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
+        secure: true, // ✅ false in sviluppo (HTTP)
+        sameSite: 'none', // ✅ 'none' per cross-origin
       });
 
     return user;
@@ -82,13 +82,13 @@ export class AuthController {
     res
       .cookie('jwt', accessToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
+        secure: true, // ✅ false in sviluppo (HTTP)
+        sameSite: 'none', // ✅ 'none' per cross-origin
       })
       .cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
+        secure: true, // ✅ false in sviluppo (HTTP)
+        sameSite: 'none', // ✅ 'none' per cross-origin
       });
 
     return user;

@@ -1,0 +1,7 @@
+organization=giuseppesindoni03
+projectKey=nest-backend
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.65944
+dashboardUrl=https://sonarcloud.io/dashboard?id=nest-backend
+ceTaskId=AZh7IwgdsBABacukDWCT
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZh7IwgdsBABacukDWCT

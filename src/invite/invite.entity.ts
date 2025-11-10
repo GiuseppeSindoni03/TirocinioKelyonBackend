@@ -1,7 +1,7 @@
 import { IsOptional } from 'class-validator';
-import { Gender } from 'src/auth/dto/gender-enum';
-import { Doctor } from 'src/doctor/doctor.entity';
-import { Patient } from 'src/patient/patient.entity';
+import { Gender } from '../auth/dto/gender-enum';
+import { Doctor } from '../doctor/doctor.entity';
+import { Patient } from '../patient/patient.entity';
 import {
   Column,
   Entity,

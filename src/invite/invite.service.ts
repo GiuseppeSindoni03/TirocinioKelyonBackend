@@ -9,14 +9,12 @@ import { Repository } from 'typeorm';
 import { Invite } from './invite.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateInviteDto } from './dto/create-invite.dto';
-import { Doctor } from 'src/doctor/doctor.entity';
-import { User } from 'src/user/user.entity';
+import { Doctor } from '../doctor/doctor.entity';
+import { User } from '../user/user.entity';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
-import { Patient } from 'src/patient/patient.entity';
+import { Patient } from '../patient/patient.entity';
 import * as bcrypt from 'bcryptjs';
-import { addDays } from 'date-fns';
-import { UserRoles } from 'src/common/enum/roles.enum';
-import { UserItem } from 'src/common/types/userItem';
+import { UserRoles } from '../common/enum/roles.enum';
 import { InviteResponseDto } from './dto/invite-response.dto';
 import { plainToInstance } from 'class-transformer';
 

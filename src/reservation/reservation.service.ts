@@ -300,16 +300,16 @@ export class ReservationService {
     const start = new Date(startTime);
     const end = new Date(endTime);
 
-    await this.ensureSlotNotBooked(doctor, start);
-
-    await this.findValidAvailabilityOrThrow(doctor, start, end);
-
     const visitTypeEntity = await this.findVisitTypeOrThrow(visitType);
 
     if (visitTypeEntity.name == VisitTypeEnum.FIRST_VISIT)
       await this.checkExistOtherVisits(doctor, patient);
 
     await this.checkVisitDuration(visitTypeEntity.durationMinutes, start, end);
+
+    await this.ensureSlotNotBooked(doctor, start);
+
+    await this.findValidAvailabilityOrThrow(doctor, start, end);
 
     const reservation = this.reservationRepository.create({
       startDate: startTime,

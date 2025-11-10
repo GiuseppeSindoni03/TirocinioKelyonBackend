@@ -36,7 +36,7 @@ export class InviteController {
   }
 
   @Post('/:id/accept')
-  //@Roles(UserRoles.PATIENT)
+  // @Roles(UserRoles.PATIENT)
   async acceptInvite(
     @Param('id', new ParseUUIDPipe()) inviteId: string,
     //@GetUser() user: UserItem,

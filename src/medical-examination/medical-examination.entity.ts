@@ -1,6 +1,6 @@
-import { Doctor } from 'src/doctor/doctor.entity';
-import { Patient } from 'src/patient/patient.entity';
-import { Reservation } from 'src/reservation/reservation.entity';
+import { Doctor } from '../doctor/doctor.entity';
+import { Patient } from '../patient/patient.entity';
+import { Reservation } from '../reservation/reservation.entity';
 import {
   Column,
   Entity,

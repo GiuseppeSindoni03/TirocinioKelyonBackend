@@ -1,4 +1,4 @@
-import { Doctor } from 'src/doctor/doctor.entity';
+import { Doctor } from '../doctor/doctor.entity';
 import {
   Column,
   Entity,
