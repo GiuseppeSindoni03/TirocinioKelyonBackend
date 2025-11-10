@@ -2,7 +2,6 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { configValidationSchema } from './config.schema';
 import { PatientModule } from './patient/patient.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { MedicalExaminationModule } from './medical-examination/medical-examination.module';
@@ -12,32 +11,31 @@ import { AvailabilityModule } from './availability/availability.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { AuthMiddleware } from './auth/middleware/auth.middleware';
 import { MedicalDetectionModule } from './medical-detection/medical-detection.module';
-// import { BaseUserInterceptor } from './transform.interceptor';
-// import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
+    // Config globale
     ConfigModule.forRoot({
-      envFilePath: [`.env.stage.${process.env.STAGE}`],
-      // validationSchema: configValidationSchema,
+      isGlobal: true,
+      // in produzione (Render) usa solo le env, in locale puoi usare .env
+      envFilePath: process.env.NODE_ENV === 'production' ? undefined : '.env',
     }),
+
+    // TypeORM + Supabase
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
-        autoLoadEntities: true,
-        synchronize: true,
-        // host: configService.get('DB_HOST'),
-        // port: configService.get('DB_PORT'),
-        // username: configService.get('DB_USERNAME'),
-        // password: configService.get('DB_PASSWORD'),
-        // database: configService.get('DB_DATABASE'),
         url: configService.get<string>('DATABASE_URL'),
-
-        //logging: 'all',
+        autoLoadEntities: true,
+        synchronize: false, // in prod MAI true, il DB è già pronto
+        ssl: {
+          rejectUnauthorized: false, // obbligatorio per Supabase
+        },
       }),
     }),
+
     AuthModule,
     PatientModule,
     DoctorModule,
@@ -49,7 +47,6 @@ import { MedicalDetectionModule } from './medical-detection/medical-detection.mo
     MedicalDetectionModule,
   ],
   controllers: [],
-  // providers: [{ useClass: BaseUserInterceptor, provide: APP_INTERCEPTOR }],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
