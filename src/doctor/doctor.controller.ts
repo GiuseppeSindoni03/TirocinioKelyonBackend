@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UnauthorizedException,
@@ -18,6 +20,7 @@ import { UserItem } from 'src/common/types/userItem';
 import { User } from 'src/user/user.entity';
 import { MedicalExaminationDTO } from 'src/invite/dto/medical-examination.dto';
 import { Reservation } from 'src/reservation/reservation.entity';
+import { UpdatePatientDto } from 'src/auth/dto/update-patient.dto';
 
 @Controller('doctor')
 @UseGuards(RolesGuard)
@@ -45,5 +48,25 @@ export class DoctorController {
   @Roles(UserRoles.DOCTOR)
   getMe(@GetUser() user: UserItem) {
     return this.doctorService.getDoctorByUserId(user.id);
+  }
+
+  @Patch('/patients/:id')
+  @Roles(UserRoles.DOCTOR)
+  updatePatient(
+    @GetUser() user: UserItem,
+    @Param('id') patientId: string,
+    @Body() updatePatientDto: UpdatePatientDto,
+  ) {
+    return this.doctorService.updatePatient(
+      user.id,
+      patientId,
+      updatePatientDto,
+    );
+  }
+
+  @Delete('/patients/:id')
+  @Roles(UserRoles.DOCTOR)
+  deletePatient(@GetUser() user: UserItem, @Param('id') patientId: string) {
+    return this.doctorService.deletePatient(user.id, patientId);
   }
 }

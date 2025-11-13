@@ -18,7 +18,7 @@ import { MedicalDetectionModule } from './medical-detection/medical-detection.mo
     ConfigModule.forRoot({
       isGlobal: true,
       // in produzione (Render) usa solo le env, in locale puoi usare .env
-      envFilePath: process.env.NODE_ENV === 'production' ? undefined : '.env',
+      envFilePath: '.env.stage.dev',
     }),
 
     // TypeORM + Supabase
@@ -27,11 +27,15 @@ import { MedicalDetectionModule } from './medical-detection/medical-detection.mo
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
-        url: configService.get<string>('DATABASE_URL'),
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'), // ← Ora è una stringa pulita
+        database: configService.get<string>('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: false, // in prod MAI true, il DB è già pronto
+        synchronize: false,
         ssl: {
-          rejectUnauthorized: false, // obbligatorio per Supabase
+          rejectUnauthorized: false,
         },
       }),
     }),
