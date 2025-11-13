@@ -15,31 +15,29 @@ import { MedicalDetectionModule } from './medical-detection/medical-detection.mo
 @Module({
   imports: [
     // Config globale
-    ConfigModule.forRoot({
-      isGlobal: true,
-      // in produzione (Render) usa solo le env, in locale puoi usare .env
-      envFilePath: '.env.stage.dev',
-    }),
+   ConfigModule.forRoot({
+      isGlobal: true,
+      // in produzione (Render) usa solo le env, in locale puoi usare .env
+      envFilePath: '.env',
+    }),
 
-    // TypeORM + Supabase
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'), // ← Ora è una stringa pulita
-        database: configService.get<string>('DB_NAME'),
-        autoLoadEntities: true,
-        synchronize: false,
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }),
-    }),
-
+    // TypeORM + Supabase
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        // 🛑 SOSTITUISCI TUTTE LE VARIABILI SEPARATE CON 'url'
+        url: configService.get<string>('DATABASE_URL'), // <-- Ora usa l'URL completo
+        autoLoadEntities: true,
+        synchronize: false,
+        // La configurazione SSL è fondamentale per Supabase, specialmente su Render
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }),
+    }),
+    
     AuthModule,
     PatientModule,
     DoctorModule,
