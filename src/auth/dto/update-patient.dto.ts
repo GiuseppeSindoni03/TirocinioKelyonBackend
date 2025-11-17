@@ -76,14 +76,11 @@ export class UpdatePatientDto {
   sport?: string;
 
   @IsOptional()
-  @IsString()
   pathologies?: string[];
 
   @IsOptional()
-  @IsString()
   medications?: string[];
 
   @IsOptional()
-  @IsString()
   injuries?: string[];
 }
