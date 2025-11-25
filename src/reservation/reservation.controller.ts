@@ -217,12 +217,15 @@ export class ReservationController {
       throw new UnauthorizedException('You are not a doctor');
     }
 
+    const pageNumber = page ? parseInt(page, 10) : 1;
+  const limitNumber = limit ? parseInt(limit, 10) : 12;
+
     return this.reservationService.getReservationsPatient(
-      user.doctor,
-      patientId,
-      page,
-      limit,
-      search,
-    );
+    user.doctor,
+    patientId,
+    pageNumber,
+    limitNumber,
+    search,
+  );
   }
 }
