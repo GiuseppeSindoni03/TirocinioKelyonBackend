@@ -207,8 +207,8 @@ export class ReservationController {
   async getReservationsPatient(
     @GetUser() user: UserItem,
     @Param('patient', new ParseUUIDPipe()) patientId: string,
-  @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-  @Query('limit', new DefaultValuePipe(12), ParseIntPipe) limit: number,
+  @Query('page') page: number,
+  @Query('limit') limit: number,
     @Query('search') search: string,
   ) {
     console.log('Sono dentro GET reservations/:patient');
