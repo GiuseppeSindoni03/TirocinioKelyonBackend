@@ -207,8 +207,8 @@ export class ReservationController {
   async getReservationsPatient(
     @GetUser() user: UserItem,
     @Param('patient', new ParseUUIDPipe()) patientId: string,
-    @Query('page') page: number,
-    @Query('limit') limit: number,
+  @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  @Query('limit', new DefaultValuePipe(12), ParseIntPipe) limit: number,
     @Query('search') search: string,
   ) {
     console.log('Sono dentro GET reservations/:patient');
@@ -217,14 +217,13 @@ export class ReservationController {
       throw new UnauthorizedException('You are not a doctor');
     }
 
-    const pageNumber = page ? parseInt(page, 10) : 1;
-  const limitNumber = limit ? parseInt(limit, 10) : 12;
+
 
     return this.reservationService.getReservationsPatient(
     user.doctor,
     patientId,
-    pageNumber,
-    limitNumber,
+    page,
+    limit,
     search,
   );
   }
